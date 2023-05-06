@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import data from "./data";
 import Record from "./components/Record";
 import { nanoid } from "nanoid";
 import StartPage from "./components/StartPage";
@@ -17,8 +16,29 @@ function App() {
   const shuffleArray = (arr) => arr.sort(() => Math.random() - 0.5);
 
   useEffect(() => {
-    const records = getNewRecords();
-    setRecords(records);
+    fetch(
+      "https://opentdb.com/api.php?amount=5&category=9&difficulty=easy&type=multiple"
+    )
+      .then((res) => res.json())
+      .then((data) => data.results)
+      .then((data) => {
+        const records = [];
+        data.map((element) =>
+          records.push({
+            id: nanoid(),
+            question: element.question,
+            selectedOption: null,
+            correctOption: element.correct_answer,
+            options: shuffleArray([
+              element.correct_answer,
+              ...element.incorrect_answers,
+            ]),
+            checked: false,
+          })
+        );
+
+        setRecords(records);
+      });
   }, [count]);
 
   function handleSelectOption(id, clickedOption) {
@@ -30,28 +50,6 @@ function App() {
       })
     );
   }
-
-  function getNewRecords() {
-    const records = [];
-
-    data.map((element) =>
-      records.push({
-        id: nanoid(),
-        question: element.question,
-        selectedOption: null,
-        correctOption: element.correct_answer,
-        options: shuffleArray([
-          element.correct_answer,
-          ...element.incorrect_answers,
-        ]),
-        checked: false,
-      })
-    );
-
-    return records;
-  }
-
-  console.log(records);
 
   const recordElements = records
     ? records.map((record) => {
@@ -80,9 +78,9 @@ function App() {
   }
 
   function startQuiz() {
-    setStarted(true)
-    setResultMode(false)
-    setCount(prevCount => prevCount + 1)
+    setStarted(true);
+    setResultMode(false);
+    setCount((prevCount) => prevCount + 1);
   }
 
   console.log(started);
@@ -99,7 +97,7 @@ function App() {
           startQuiz={startQuiz}
         />
       ) : (
-        <StartPage startQuiz={startQuiz}/>
+        <StartPage startQuiz={startQuiz} />
       )}
     </main>
   );
