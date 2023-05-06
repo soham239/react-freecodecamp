@@ -2,15 +2,16 @@ import React, { useState, useEffect } from "react";
 import data from "./data";
 import Record from "./components/Record";
 import { nanoid } from "nanoid";
+import StartPage from "./components/StartPage";
+import Questions from "./components/Questions";
 
 function App() {
   console.log("App Rendered");
 
   const [records, setRecords] = useState([]);
   const [count, setCount] = useState(0);
-  //   const [checked, setChecked] = useState(false);
-  //   const [correct, setCorrect] = useState(0);
-  const [resultMode, setResultMode] = useState(false)
+  const [resultMode, setResultMode] = useState(false);
+  const [started, setStarted] = useState(false);
 
   // Utility function to shuffle the array content
   const shuffleArray = (arr) => arr.sort(() => Math.random() - 0.5);
@@ -22,7 +23,7 @@ function App() {
 
   function handleSelectOption(id, clickedOption) {
     setRecords((records) =>
-    records.map((record) => {
+      records.map((record) => {
         return record.id === id
           ? { ...record, selectedOption: clickedOption, checked: true }
           : record;
@@ -50,7 +51,7 @@ function App() {
     return records;
   }
 
-  console.log(records)
+  console.log(records);
 
   const recordElements = records
     ? records.map((record) => {
@@ -66,36 +67,40 @@ function App() {
       })
     : [];
 
-   function getCheckedCount() {
-        return records.filter(record => record.checked).length
-   }
+  function getCorrectCount() {
+    return records.filter(
+      (record) => record.selectedOption === record.correctOption
+    ).length;
+  }
 
-   function getCorrectCount() {
-        return records.filter(record => record.selectedOption === record.correctOption).length
-   }
- 
-   const allChecked = records.filter(record => record.checked).length === 5
+  const allChecked = records.filter((record) => record.checked).length === 5;
 
-   function showResults() {
-    console.log("Showing results")
+  function showResults() {
+    setResultMode(true);
+  }
 
-   console.log("Checked count")
-   console.log(getCheckedCount())
+  function startQuiz() {
+    setStarted(true)
+    setResultMode(false)
+    setCount(prevCount => prevCount + 1)
+  }
 
-
-   console.log("Correct count")
-   console.log(getCorrectCount())
-
-
-    setResultMode(true)
-   }
+  console.log(started);
 
   return (
     <main>
-      {recordElements}
-      <div className="button-container">
-        <button disabled={!allChecked} className="check-answers-btn" onClick={showResults}>Check Answers</button>
-      </div>
+      {started ? (
+        <Questions
+          recordElements={recordElements}
+          allChecked={allChecked}
+          showResults={showResults}
+          resultMode={resultMode}
+          getCorrectCount={getCorrectCount}
+          startQuiz={startQuiz}
+        />
+      ) : (
+        <StartPage startQuiz={startQuiz}/>
+      )}
     </main>
   );
 }
