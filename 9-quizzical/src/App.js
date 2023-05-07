@@ -3,6 +3,7 @@ import Record from "./components/Record";
 import { nanoid } from "nanoid";
 import StartPage from "./components/StartPage";
 import Questions from "./components/Questions";
+import he from "he";
 
 function App() {
   console.log("App Rendered");
@@ -26,12 +27,12 @@ function App() {
         data.map((element) =>
           records.push({
             id: nanoid(),
-            question: element.question,
+            question: he.decode(element.question),
             selectedOption: null,
-            correctOption: element.correct_answer,
+            correctOption: he.decode(element.correct_answer),
             options: shuffleArray([
-              element.correct_answer,
-              ...element.incorrect_answers,
+                he.decode(element.correct_answer),
+              ...element.incorrect_answers.map(answer => he.decode(answer)),
             ]),
             checked: false,
           })
@@ -79,11 +80,12 @@ function App() {
 
   function startQuiz() {
     setStarted(true);
+  }
+
+  function startNewRound() {
     setResultMode(false);
     setCount((prevCount) => prevCount + 1);
   }
-
-  console.log(started);
 
   return (
     <main>
@@ -94,7 +96,7 @@ function App() {
           showResults={showResults}
           resultMode={resultMode}
           getCorrectCount={getCorrectCount}
-          startQuiz={startQuiz}
+          startNewRound={startNewRound}
         />
       ) : (
         <StartPage startQuiz={startQuiz} />

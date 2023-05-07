@@ -10,7 +10,7 @@ function Questions(props) {
                 <button
         
             className="results-btn"
-            onClick={props.startQuiz}
+            onClick={props.startNewRound}
           >
             Play Again
           </button>
